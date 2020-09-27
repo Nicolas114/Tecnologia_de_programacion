@@ -1,7 +1,7 @@
 package proyecto1;
 
 import java.util.ArrayList;
-import java.util.Objects;
+import java.util.Iterator;
 import java.util.logging.*;
 
 public class Graph {
@@ -18,7 +18,7 @@ public class Graph {
 			logger = Logger.getLogger(Graph.class.getName());
 
 			Handler hnd = new ConsoleHandler();
-			hnd.setLevel(Level.FINE);
+			hnd.setLevel(Level.WARNING);
 			logger.addHandler(hnd);
 
 			logger.setLevel(Level.WARNING);
@@ -34,10 +34,10 @@ public class Graph {
 		Integer nuevo = node;
 		if (!nodos.contains(nuevo)) {
 			nodos.add(nuevo);
-			logger.info("Nodo " + nuevo + " agregado correctamente.");
+			logger.fine("Nodo " + nuevo + " agregado correctamente.");
 		}
 		else {
-			logger.warning("No se puede agregar el nodo " + nuevo + ". Ya existe el mismo elemento en el grafo.");
+			logger.warning("FALLO addNode(" + node + "): ya existe el mismo elemento en el grafo.");
 		}
 	}
 	
@@ -54,7 +54,7 @@ public class Graph {
 		for (Edge arco : this.arcos) {
 			tiene_un_arco = arco.equals(nuevo_arco) || arco.equals(arco_invertido);
 			if (tiene_un_arco) {
-				logger.warning("No se puede añadir el arco " + nuevo_arco + ". Los nodos ya están conectados.");
+				logger.warning("FALLO addEdge(" + nodo1 + ", " + nodo2 + "): los nodos ya están conectados.");
 				break;
 			}
 		}
@@ -65,7 +65,7 @@ public class Graph {
 			
 			if (contiene_nodo1 && contiene_nodo2) {
 				arcos.add(nuevo_arco);
-				logger.info("Arco " + nuevo_arco + " agregado correctamente.");
+				logger.fine("Arco " + nuevo_arco + " agregado correctamente.");
 			}
 			else {
 				logger.warning("FALLO addEdge(" + nodo1 + ", " + nodo2 + "): No existe al menos uno de los nodos parametrizados.");
@@ -76,28 +76,31 @@ public class Graph {
 
 	public void removeNode(int node){
 		Integer a_remover = node;
-		boolean tiene_arco = false, esta_nodo;
-
-		for (Edge arco : this.arcos){
+		boolean tiene_arco = false, esta_nodo = false;
+		
+		Iterator<Edge> it = arcos.iterator();
+		while (it.hasNext()) {
+			Edge arco = it.next();
 			tiene_arco = (arco.obtenerOrigen() == a_remover || arco.obtenerDestino() == a_remover);
 			if (tiene_arco) {
-				arcos.remove(arco);
-				break;
+				esta_nodo = true;
+				it.remove();
+				logger.info("El arco " + arco + " conectaba el nodo " + node + " y ha sido eliminado.");
 			}
 		}
 		
-		if (tiene_arco) {
+		if (esta_nodo) {
 			nodos.remove(a_remover);
-			logger.info("Nodo " + a_remover +" removido exitosamente con todos los arcos que lo unen.");
+			logger.fine("Nodo " + a_remover +" removido exitosamente con todos los arcos que lo unen.");
 		}
 		else {
 			esta_nodo = nodos.contains(a_remover);
 			if (esta_nodo) {
 				nodos.remove(a_remover);
-				logger.info("Nodo " + a_remover +" removido exitosamente. No había arcos apuntando a él.");
+				logger.fine("Nodo " + a_remover +" removido exitosamente. No había arcos apuntando a él.");
 			}
 			else {
-				logger.warning("FALLÓ METODO removeNode: El nodo " + a_remover + " no se encuentra en el grafo.");
+				logger.warning("FALLÓ removeNode(" + node + "): El nodo " + a_remover + " no se encuentra en el grafo.");
 			}
 		}
 	}
@@ -111,13 +114,14 @@ public class Graph {
 			tiene_arco = (arco.obtenerOrigen() == nodo1 && arco.obtenerDestino() == nodo2);
 			if (tiene_arco) {
 				arcos.remove(arco);
-				logger.info("Arco " + arco + " removido exitosamente.");
+				logger.fine("Arco " + arco + " removido exitosamente.");
 				break;
 			}
 		}
 		
 		if (!tiene_arco) {
-			logger.warning("FALLÓ METODO removeEdge: No hay un arco que una " + nodo1 + " con " + nodo2 + ".");
+			logger.warning("FALLÓ removeEdge(" + node1 + ", " + node2 + 
+					"): No hay un arco que una " + nodo1 + " con " + nodo2 + ".");
 		}
 	}
 	
